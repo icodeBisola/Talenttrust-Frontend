@@ -47,7 +47,7 @@ Axe audits run as part of the standard Jest suite. Any violation fails the suite
 ## CI
 
 The GitHub Actions workflow (`.github/workflows/ci.yml`) already runs `npm test` on every push and pull request to the `main` branch. Adding new a11y tests to `a11y.test.tsx` automatically gates violations in CI.
-
+he
 ## Skip-to-content link (WCAG 2.4.1 Bypass Blocks)
 
 A visually-hidden skip link is rendered as the **first focusable element** in `<body>` (inside `src/app/layout.tsx`). It lets keyboard and screen-reader users skip the sticky header navigation on every page.

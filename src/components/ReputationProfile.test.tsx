@@ -332,7 +332,7 @@ describe('ReputationProfile – accessible labelling', () => {
 
   it('sr-only span announces "Reputation score " before the numeric value', () => {
     renderProfile({ name: 'SR Score User', score: 77, history: [] });
-    const srSpans = screen.getAllByText(/Reputation score /i);
+    const srSpans = screen.getAllByText(/Reputation score/i);
     // At least one sr-only span should exist.
     const srOnlySpan = srSpans.find((el) => el.classList.contains('sr-only'));
     expect(srOnlySpan).toBeDefined();
@@ -340,14 +340,14 @@ describe('ReputationProfile – accessible labelling', () => {
 
   it('sr-only span announces " out of 5" after the numeric score', () => {
     renderProfile({ name: 'SR Out User', score: 77, history: [] });
-    const outOf5 = screen.getAllByText(/ out of 5/i);
+    const outOf5 = screen.getAllByText(/out of 5/i);
     const srOnlySpan = outOf5.find((el) => el.classList.contains('sr-only'));
     expect(srOnlySpan).toBeDefined();
   });
 
   it('sr-only span announces "Level " before the level text when score exists', () => {
     renderProfile({ name: 'SR Level User', score: 77, level: 'Expert', history: [] });
-    const levelSpans = screen.getAllByText(/^Level $/i);
+    const levelSpans = screen.getAllByText(/^Level$/i);
     const srOnlySpan = levelSpans.find((el) => el.classList.contains('sr-only'));
     expect(srOnlySpan).toBeDefined();
   });

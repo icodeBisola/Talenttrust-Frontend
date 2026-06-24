@@ -142,7 +142,7 @@ const ActionPanel = ({
           <button
             type="button"
             ref={el => { triggerButtonRef.current = el; }}
-            onClick={e => handleOpenConfirm('release', e.currentTarget)}
+            onClick={() => handleOpenConfirm('release')}
             disabled={!isWalletConnected || isLoading || !!disabledReasons?.releaseFunds}
             title={!isWalletConnected ? noWalletMsg : undefined}
             aria-label="Release funds to the contractor"
@@ -157,7 +157,7 @@ const ActionPanel = ({
           <button
             type="button"
             ref={el => { triggerButtonRef.current = el; }}
-            onClick={e => handleOpenConfirm('dispute', e.currentTarget)}
+            onClick={() => handleOpenConfirm('dispute')}
             disabled={!isWalletConnected || isLoading || !!disabledReasons?.dispute}
             title={!isWalletConnected ? noWalletMsg : undefined}
             aria-label="Open a dispute for this contract"

@@ -1,5 +1,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
+import { toHaveNoViolations } from 'jest-axe';
+expect.extend(toHaveNoViolations);
 
 // Mock matchMedia (not implemented in jsdom)
 Object.defineProperty(window, 'matchMedia', {
@@ -47,3 +49,27 @@ class MockIntersectionObserver {
 if (typeof global.IntersectionObserver === 'undefined') {
   global.IntersectionObserver = MockIntersectionObserver as any;
 }
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = value; },
+    clear: () => { store = {}; },
+    removeItem: (key: string) => { delete store[key]; },
+  };
+})();
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
+// Global mock for WalletContext so components using useWallet work without a provider
+jest.mock('@/contexts/WalletContext', () => ({
+  useWallet: jest.fn().mockReturnValue({
+    address: '0x123',
+    isConnecting: false,
+    error: null,
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+  }),
+  WalletProvider: ({ children }: { children: React.ReactNode }) => children,
+}));

@@ -31,11 +31,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Keep tests from rendering <html> / <body> into the testing DOM
-  if (process.env.NODE_ENV === 'test') {
-    return <>{children}</>;
-  }
-
   return (
     <html lang="en">
       <body>

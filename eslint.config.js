@@ -1,7 +1,6 @@
 const js = require('@eslint/js');
 const globals = require('globals');
 const nextPlugin = require('eslint-config-next');
-const tsParser = require('@typescript-eslint/parser');
 
 module.exports = [
   {
@@ -13,12 +12,10 @@ module.exports = [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
-      parser: tsParser,
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
-        project: './tsconfig.json',
       },
       globals: {
         ...globals.browser,

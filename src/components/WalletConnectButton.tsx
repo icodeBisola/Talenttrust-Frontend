@@ -2,17 +2,48 @@
 
 import React, { useState } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
+import { useToast } from '@/components/toast/toast-provider';
 import { truncateAddress } from '@/lib/truncateAddress';
 
 export const WalletConnectButton = () => {
   const { address, isConnecting, error, connect, disconnect } = useWallet();
+  const { showError } = useToast();
   const [copied, setCopied] = useState(false);
 
+  /**
+   * Copies the connected wallet address to the system clipboard.
+   *
+   * Guards against environments where the Clipboard API is unavailable
+   * (insecure contexts, older browsers, or denied permissions) and wraps
+   * the async write in a try/catch so failures surface as user-visible
+   * error toasts rather than unhandled promise rejections.
+   *
+   * - Sets `copied = true` **only** when the write actually succeeds,
+   *   reverting to `false` after 2 seconds.
+   * - On any failure, triggers an error toast via `showError` without
+   *   logging sensitive address data to the console.
+   */
   const handleCopy = async () => {
-    if (address) {
+    if (!address) return;
+
+    if (!navigator?.clipboard?.writeText) {
+      showError({
+        title: 'Copy not supported',
+        description: 'Your browser does not support clipboard access. Please copy the address manually.',
+      });
+      return;
+    }
+
+    try {
       await navigator.clipboard.writeText(address);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Do not log the address — treat it as sensitive user data.
+      showError({
+        title: 'Copy failed',
+        description: 'Unable to copy the address to your clipboard. Please try again.',
+      });
     }
   };
 

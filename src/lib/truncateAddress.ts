@@ -6,11 +6,13 @@ export function truncateAddress(value: string, prefixLength = 6, suffixLength = 
   }
 
   const normalizedValue = normalizeStellarAddress(value);
-  const displayValue = isValidStellarAddress(normalizedValue) ? normalizedValue : value;
-
-  if (displayValue.length <= prefixLength + suffixLength + 3) {
-    return displayValue;
+  if (!isValidStellarAddress(normalizedValue)) {
+    return value;
   }
 
-  return `${displayValue.slice(0, prefixLength)}...${displayValue.slice(-suffixLength)}`;
+  if (normalizedValue.length <= prefixLength + suffixLength + 3) {
+    return normalizedValue;
+  }
+
+  return `${normalizedValue.slice(0, prefixLength)}...${normalizedValue.slice(-suffixLength)}`;
 }

@@ -1,10 +1,10 @@
-const js = require('@eslint/js');
-const tseslint = require('@typescript-eslint/eslint-plugin');
-const tsParser = require('@typescript-eslint/parser');
+const { default: nextPlugin } = require('eslint-config-next/flat');
 
 module.exports = [
+  // Ignore stray files that should never be linted
   {
     ignores: ['test_check.js'],
   },
-  ...nextConfig,
+  // Next.js recommended rules (includes react, react-hooks, @next/next)
+  ...nextPlugin,
 ];

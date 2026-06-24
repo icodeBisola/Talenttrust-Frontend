@@ -20,7 +20,7 @@ export default class SafeBoundary extends Component<Props, State> {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  componentDidCatch(error: Error, _info: React.ErrorInfo) {
     reportError(error, 'SafeBoundary');
   }
 

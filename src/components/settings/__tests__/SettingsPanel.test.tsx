@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { axe } from 'jest-axe';
 import { SettingsPanel } from '../SettingsPanel';
-import { PreferencesProvider, usePreferences } from '@/lib/preferences';
+import { PreferencesProvider } from '@/lib/preferences';
 
 const renderWithProvider = (ui: React.ReactElement) => {
   return render(

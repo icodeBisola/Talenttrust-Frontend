@@ -2,10 +2,11 @@ const js = require('@eslint/js');
 const globals = require('globals');
 const nextPlugin = require('eslint-config-next');
 const tsParser = require('@typescript-eslint/parser');
+const tsPlugin = require('@typescript-eslint/eslint-plugin');
 
 module.exports = [
   {
-    ignores: ['test_check.js'],
+    ignores: ['test_check.js', '.next/**', 'node_modules/**', 'src/declarations.d.ts'],
   },
   js.configs.recommended,
   {
@@ -14,9 +15,7 @@ module.exports = [
       ecmaVersion: 2022,
       sourceType: 'module',
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
       },
       globals: {
         ...globals.browser,
@@ -26,12 +25,9 @@ module.exports = [
         JSX: 'readonly',
       },
     },
-    plugins: {
-      next: nextPlugin,
-    },
+    plugins: { next: nextPlugin },
     rules: {
       ...nextPlugin.rules,
-      'react-hooks/set-state-in-effect': 'off',
     },
   },
   {
@@ -39,9 +35,7 @@ module.exports = [
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
       },
       globals: {
         ...globals.browser,
@@ -53,10 +47,20 @@ module.exports = [
     },
     plugins: {
       next: nextPlugin,
+      '@typescript-eslint': tsPlugin,
     },
     rules: {
       ...nextPlugin.rules,
-      'react-hooks/set-state-in-effect': 'off',
+      // Disable base rule — @typescript-eslint/no-unused-vars handles TS correctly
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', {
+        vars: 'all',
+        args: 'after-used',
+        ignoreRestSiblings: true,
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
     },
   },
 ];

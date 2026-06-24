@@ -177,7 +177,7 @@ describe('persistence and re-render', () => {
     expect(saved.quietMode).toBe(true);
 
     // Simulate new page load
-    const { result: fresh } = renderHook(() => usePreferences(), { wrapper });
+    renderHook(() => usePreferences(), { wrapper });
     act(() => {}); // flush effects
     // fresh hook loads from the saved localStorage value set above
     expect(JSON.parse(localStorage.getItem('talenttrust-user-preferences') || '{}').quietMode).toBe(true);

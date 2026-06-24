@@ -99,7 +99,7 @@ export function WalletProvider({
       await new Promise((resolve) => setTimeout(resolve, 1000));
       // Mocked address
       setAddress('0x71C7656EC7ab88b098defB751B7401B5f6d8976F');
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to connect wallet');
     } finally {
       setIsConnecting(false);

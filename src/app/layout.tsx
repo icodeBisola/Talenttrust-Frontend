@@ -5,6 +5,17 @@ import { ToastProvider } from '@/components/toast/toast-provider';
 export const metadata: Metadata = {
   title: 'TalentTrust - Safe Freelance Payments',
   description: 'Safe, secure payments that protect both freelancers and clients throughout your project.',
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
 };
 
 import { PreferencesProvider } from '@/lib/preferences';

@@ -1,9 +1,9 @@
-'use client';
-
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import ContractSummary from '@/components/ContractSummary';
 import MilestonesList, { Milestone } from '@/components/MilestonesList';
 import ActionPanel from '@/components/ActionPanel';
+import { isValidContractId } from '@/lib/validateContractId';
 
 const sampleMilestones: Milestone[] = [
   {
@@ -32,7 +32,17 @@ const sampleMilestones: Milestone[] = [
   },
 ];
 
-const ContractDetailPage = ({ params }: { params: { id: string } }) => {
+interface ContractDetailPageProps {
+  params: Promise<{ id: string }>;
+}
+
+const ContractDetailPage = async ({ params }: ContractDetailPageProps) => {
+  const { id } = await params;
+
+  if (!isValidContractId(id)) {
+    notFound();
+  }
+
   const status = 'Active' as const;
 
   const handleSubmitMilestone = () => {
@@ -57,7 +67,7 @@ const ContractDetailPage = ({ params }: { params: { id: string } }) => {
         <div className="flex items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div>
             <p className="text-sm text-slate-500">Contract details</p>
-            <h1 className="mt-2 text-3xl font-semibold text-slate-900">Contract #{params.id}</h1>
+            <h1 className="mt-2 text-3xl font-semibold text-slate-900">Contract #{id}</h1>
           </div>
           <Link
             href="/contracts"

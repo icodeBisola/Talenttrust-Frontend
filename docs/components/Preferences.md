@@ -1,44 +1,157 @@
-# Preferences Component & Context
+# Preferences
 
-The preferences module provides a React context and hooks to manage user preferences across the application. It handles options such as theme selection, currency formatting, toast notifications density, and quiet mode.
+`src/lib/preferences.tsx`
 
-## API Usage
+Global user-preference state (theme, amount format, toast density, quiet mode) backed by `localStorage`. Used across the escrow payout display in `MilestonesList` and any component that needs to format monetary amounts.
+
+---
+
+## API
 
 ### `PreferencesProvider`
 
-Wrap the root layout or application container in the `PreferencesProvider` component.
+Mount once at the app root (e.g. `app/layout.tsx`). Loads persisted preferences from `localStorage` on mount and writes back on every change.
 
 ```tsx
-import { PreferencesProvider } from '@/lib/preferences';
-
-export default function RootLayout({ children }) {
-  return (
-    <PreferencesProvider>
-      {children}
-    </PreferencesProvider>
-  );
-}
+<PreferencesProvider>{children}</PreferencesProvider>
 ```
 
-### `usePreferences`
+### `usePreferences()`
 
-Use the hook within components to access or modify preferences.
+Returns `{ preferences, updatePreference, formatAmount }`.
 
-```tsx
-import { usePreferences } from '@/lib/preferences';
+| Field | Type | Description |
+|---|---|---|
+| `preferences` | `UserPreferences` | Current values |
+| `updatePreference(key, value)` | `function` | Merge-update one field and persist |
+| `formatAmount(amount, currency?)` | `function` | Format a number per `amountFormat` |
 
-const { preferences, updatePreference, formatAmount } = usePreferences();
+### `formatAmount(amount: number, currency?: string): string`
+
+| `amountFormat` | Behaviour |
+|---|---|
+| `'usd'` (default) | `Intl.NumberFormat` `en-US`, currency style, passed `currency` (default `"USD"`) |
+| `'ngn'` | `Intl.NumberFormat` `en-NG`, currency forced to `"NGN"` |
+| `'compact'` | `en-US`, compact notation, currency style with passed `currency` |
+
+Edge cases handled: `0`, fractions (e.g. `0.5`), large payouts (`1 000 000+`), negative amounts.
+
+---
+
+## Types
+
+```ts
+type Theme        = 'light' | 'dark' | 'system';
+type AmountFormat = 'usd'   | 'ngn'  | 'compact';
+type ToastDensity = 'relaxed' | 'compact';
+
+interface UserPreferences {
+  theme:        Theme;
+  amountFormat: AmountFormat;
+  toastDensity: ToastDensity;
+  quietMode:    boolean;
+}
 ```
 
 ---
 
-## Safe Storage
+## Usage example
 
-The preferences state is persisted to `localStorage` using a defensive wrapper defined in `src/lib/safeStorage.ts`. This wrapper hardens storage operations to prevent application crashes when interacting with local storage.
+```tsx
+'use client';
+import { usePreferences } from '@/lib/preferences';
 
-### Resiliency Features
+export function PayoutAmount({ amount, currency }: { amount: number; currency: string }) {
+  const { formatAmount } = usePreferences();
+  return <span>{formatAmount(amount, currency)}</span>;
+}
+```
 
-- **SSR-Safe**: Automatically detects SSR environments (when `window` is undefined) and falls back to in-memory state without attempting to access local storage.
-- **Disabled Storage Resilience**: In private-browsing modes or when cookies/storage access is disabled by user settings, accessing `localStorage` normally throws a `SecurityError`. The wrapper intercepts this once, registers that storage is unavailable, and degrades to a temporary in-memory store.
-- **Quota Exceeded Resilience**: If the browser's storage quota is exceeded (which throws a `QuotaExceededError` or similar write exception), the write is intercepted, and the state continues to be held and updated in the in-memory store to keep the React render tree crash-free.
-- **Dev-Only Warn Logging**: Errors caught by the wrapper are logged to the console at most once during development to aid developers without spamming console outputs. In production, warnings are swallowed entirely.
+---
+
+## Accessibility
+
+- No interactive UI is provided by this module; it is a context/hook layer only.
+- Components consuming `formatAmount` must wrap output in appropriate ARIA text — e.g. `<span aria-label="Payout $1,000.00">$1,000.00</span>`.
+
+---
+
+## Testing
+
+File: `src/lib/__tests__/preferences.test.tsx`
+
+Coverage targets (≥ 95%):
+
+| Area | Tests |
+|---|---|
+| Default preferences | `provides default preferences` |
+| localStorage read | `loads preferences from localStorage on mount`, `merges partial data with defaults`, `falls back on invalid JSON` |
+| localStorage write | `updates preferences and persists` |
+| `formatAmount` – USD | zero, fraction, large, negative, default currency |
+| `formatAmount` – NGN | typical, zero, large |
+| `formatAmount` – compact | thousands (`K`), millions (`M`), zero |
+| Custom currency handling | default and compact formats preserve caller-provided currency |
+| Re-render consumer | `consumer component re-renders with updated format` |
+| Outside provider | default fallback formatting and no-op `updatePreference` |
+
+Run tests:
+
+```bash
+npm test -- --testPathPattern=preferences --coverage
+```
+
+---
+
+## ThemeToggle
+
+`src/components/ThemeToggle.tsx`
+
+One-click header button that toggles between `light` and `dark` themes. Uses the same `updatePreference('theme', ...)` call as `SettingsPanel`, so the two stay in sync.
+
+### Behaviour
+
+| Current theme | Button action | Result |
+|---|---|---|
+| `'light'` | click | sets `'dark'` |
+| `'dark'` | click | sets `'light'` |
+| `'system'` | click | sets `'dark'` (gives the user an explicit state) |
+
+`'system'` remains available via **Settings → Appearance → system**.
+
+### SSR safety
+
+The component renders `null` until its `useEffect` fires (mounted guard), preventing hydration mismatch. No flash of incorrect icon occurs because the `PreferencesProvider` also waits for `isHydrated`.
+
+### Accessibility
+
+- `aria-label` reflects the *next* action: `"Switch to dark theme"` / `"Switch to light theme"`.
+- `aria-pressed` reflects the *current* dark state (`true` when dark, `false` otherwise).
+- Inherits project focus-ring via `focus-visible:ring-2 focus-visible:ring-[var(--primary)]`.
+
+### Usage
+
+Mount once in the app header (already done in `src/app/layout.tsx`):
+
+```tsx
+import { ThemeToggle } from '@/components/ThemeToggle';
+
+<div className="flex items-center gap-2">
+  <ThemeToggle />
+  <WalletConnectButton />
+</div>
+```
+
+### Testing
+
+File: `src/components/__tests__/ThemeToggle.test.tsx`
+
+| Test | Description |
+|---|---|
+| SSR guard | button present after mount |
+| Light label/icon | moon icon, aria-label "Switch to dark theme", aria-pressed false |
+| Dark label/icon | sun icon, aria-label "Switch to light theme", aria-pressed true |
+| light → dark | click updates preference to dark |
+| dark → light | click updates preference to light |
+| system → dark | first click from system sets dark |
+| aria-pressed | reflects dark state after toggle |
+| localStorage | toggled value persisted |

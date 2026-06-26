@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import { ToastProvider } from '@/components/toast/toast-provider';
 import ContractDetailPage from '../page';
 import * as contractResolver from '@/lib/contractResolver';
 
@@ -73,7 +73,11 @@ describe('ContractDetailPage', () => {
   it('renders the contract overview and action panel after successful load', async () => {
     const params = Promise.resolve({ id: '123' });
     const Component = await ContractDetailPage({ params });
-    render(Component);
+    render(
+      <ToastProvider>
+        {Component}
+      </ToastProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Contract #123')).toBeInTheDocument();
@@ -136,7 +140,11 @@ describe('ContractDetailPage', () => {
   it('keeps the "Back to contracts" link for a valid id', async () => {
     const params = Promise.resolve({ id: 'contract-42' });
     const Component = await ContractDetailPage({ params });
-    render(Component);
+    render(
+      <ToastProvider>
+        {Component}
+      </ToastProvider>
+    );
 
     expect(screen.getByRole('link', { name: /back to contracts/i })).toHaveAttribute('href', '/contracts');
   });

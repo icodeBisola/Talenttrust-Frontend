@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import HeaderActions from '../HeaderActions';
@@ -46,11 +46,12 @@ describe('HeaderActions', () => {
     const toggle = screen.getByRole('button', { name: /open wallet actions/i });
     const menu = screen.getByRole('region', { name: /wallet actions/i });
 
-    await user.click(toggle);
+    toggle.focus();
+    await user.keyboard('{Enter}');
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(menu).not.toHaveClass('hidden');
 
-    await user.click(toggle);
+    await user.keyboard('[Space]');
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     expect(menu).toHaveClass('hidden');
   });
